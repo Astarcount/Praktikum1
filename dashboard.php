@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['username'])) {
-    // User is already logged in, redirect to welcome page  
+     
     header("Location: login.php");
         exit();
 
@@ -9,20 +9,16 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-// Buat nama file untuk menyimpan jumlah login per user
 $file = "login_count_{$username}.txt";
 
-// Cek apakah file sudah ada, jika ya ambil isinya, kalau belum mulai dari 0
 if (file_exists($file)) {
     $count = (int)file_get_contents($file);
 } else {
     $count = 0;
 }
 
-// Tambah 1 setiap kali halaman dibuka
 $count++;
 
-// Simpan kembali ke file
 file_put_contents($file, $count);
 
 if(!isset($_SESSION["daftar"])){
@@ -94,7 +90,7 @@ if(isset($_POST["nama"]) && isset($_POST["umur"])){
             </tr>
             <tr>
                 <td>Umur</td>
-                <td><input type="text" name="umur" /></td>
+                <td><input type="number" name="umur" /></td>
             </tr>
             <tr>
                 <td colspan="2" style="text-align: center;">
@@ -105,19 +101,46 @@ if(isset($_POST["nama"]) && isset($_POST["umur"])){
                 </td>
             </tr>
         </table>
-        <table>
+        <table border="1"> 
             <tr>
                 <td>Nama</td>
                 <td>Umur</td>
+                <td>Keterangan</td>
+                <td>Aksi</td>
             </tr>
-                <?php foreach($_SESSION["daftar"] as $daftar): ?>
-                 <tr>
-                    <td><?php echo $daftar["nama"] ?></td>
-                    <td><?php echo $daftar["umur"] ?></td>
-                 </tr>
+                <?php foreach($_SESSION["daftar"] as $index => $daftar_item): ?>
+            <tr>
+                <td><?php echo $daftar_item["nama"] ?></td>
+                <td><?php echo $daftar_item["umur"] ?></td>
+                <td>
+                    <?php
+                    switch (true) {
+                    case ($daftar_item["umur"] >= 0 && $daftar_item["umur"] <= 13):
+                    echo "Anak-anak";
+                    break;
+                    case ($daftar_item["umur"] >= 14 && $daftar_item["umur"] <= 25):
+                    echo "Remaja";
+                    break;
+                    case ($daftar_item["umur"] > 25 && $daftar_item["umur"] <= 40):
+                    echo "Dewasa";
+                    break;
+                    case ($daftar_item["umur"] > 40 && $daftar_item["umur"] <= 60):
+                    echo "Tua";
+                    break;
+                    case ($daftar_item["umur"] > 60):
+                    echo "Lansia";
+                    break;
+                    }
+                    ?>
+                </td>
+                <td>
+                    <a href="hapus.php?kunci=<?php echo $index; ?>">hapus</a>
+                </td>
+            </tr>
                  <?php endforeach; ?>
         </table>
         </form>    
-        <?php echo "Selamat datang " . $username . " ke-" . $count  ; ?></h1>`
+        <?php echo "Selamat datang " . $username . " ke-" . $count  ; ?>
+        </h1>`
     </body>
 </html>
