@@ -1,6 +1,6 @@
 <?php
 session_start();
-$index = $_GET["kunci"];
+$index = $_GET["index"];
 unset($_SESSION["daftar"][$index]);
-header("location: dashboard.php");
+header("Location: dashboard.php")
 ?>

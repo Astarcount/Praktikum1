@@ -1,38 +1,58 @@
 <?php
 session_start();
 if (!isset($_SESSION['username'])) {
-     
+    // User is already logged in, redirect to welcome page  
     header("Location: login.php");
-        exit();
+
+    exit();
 
 }
 
 $username = $_SESSION['username'];
 
+// Buat nama file untuk menyimpan jumlah login per user
 $file = "login_count_{$username}.txt";
 
+// Cek apakah file sudah ada, jika ya ambil isinya, kalau belum mulai dari 0
 if (file_exists($file)) {
     $count = (int)file_get_contents($file);
 } else {
     $count = 0;
 }
 
+// Tambah 1 setiap kali halaman dibuka
 $count++;
 
+// Simpan kembali ke file
 file_put_contents($file, $count);
 
 if(!isset($_SESSION["daftar"])){
     $_SESSION["daftar"] = [];
-}
 
+}
 if(isset($_POST["nama"]) && isset($_POST["umur"])){
     $daftar = [
-        "nama" => $_POST["nama"],
-        "umur" => $_POST["umur"]
+        "nama"=> $_POST["nama"],
+        "umur"=> $_POST["umur"]
     ];
-    $_SESSION["daftar"][] = $daftar;
+
+    $_SESSION["daftar"][]=$daftar;
 }
 
+$data_daftar = [
+    "nama" => "",
+    "umur" => "",
+];
+
+$target = "dashboard.php";
+if(isset($_GET["index"])){
+    // disini dianggap terjadi proses update
+    $target = "update.php?index=" . $_GET["index"];
+    if($_GET["index"] != null) {
+        $index = $_GET["index"];
+        $data_daftar = $_SESSION["daftar"][$index];
+    }
+}
 
 ?>
 <html>
@@ -46,6 +66,12 @@ if(isset($_POST["nama"]) && isset($_POST["umur"])){
                 align-items: center;
                 height: 100vh;
             }
+        </style>
+            <title>Dashboard</title>
+
+            <head>
+        <title>::Login Page::</title>
+        <style type="text/css">
             body{
                 display: flex;
                 justify-content: center;
@@ -60,7 +86,6 @@ if(isset($_POST["nama"]) && isset($_POST["umur"])){
                 padding: 20px;
                 border-radius: 10px;
                 font-family:Arial, Helvetica, sans-serif;
-                cursor: pointer;
             }
             td{
                 padding: 5px;
@@ -70,27 +95,26 @@ if(isset($_POST["nama"]) && isset($_POST["umur"])){
                 padding: 10px;
                 border-radius: 5px;
             }
-            #logout{
-                background-color: red;
+            #logout {
+                background-color:rgb(236, 80, 80);
                 cursor: pointer;
-
             }
         </style>
     </head>
     <body>
-        <h1>
-        <form action="dashboard.php" method="post">
+        <h1><?php echo "Selamat datang " . $username . " ke-" . $count  ; ?></h1>
+            <form action="<?php echo $target; ?>" method="post">
          <table>
             <tr>
                 <td colspan="2" style="text-align: center;" >DAFTAR</td>
             </tr>
             <tr>
                 <td>Nama</td>
-                <td><input type="text" name="nama" /></td>
+                <td><input type="text" name="nama" value="<?php echo $data_daftar["nama"] ?>" /></td>
             </tr>
             <tr>
                 <td>Umur</td>
-                <td><input type="number" name="umur" /></td>
+                <td><input type="number" name="umur" value="<?php echo $data_daftar["umur"] ?>"/></td>
             </tr>
             <tr>
                 <td colspan="2" style="text-align: center;">
@@ -101,46 +125,35 @@ if(isset($_POST["nama"]) && isset($_POST["umur"])){
                 </td>
             </tr>
         </table>
-        <table border="1"> 
+        <table border="1">
             <tr>
                 <td>Nama</td>
                 <td>Umur</td>
                 <td>Keterangan</td>
                 <td>Aksi</td>
             </tr>
-                <?php foreach($_SESSION["daftar"] as $index => $daftar_item): ?>
-            <tr>
-                <td><?php echo $daftar_item["nama"] ?></td>
-                <td><?php echo $daftar_item["umur"] ?></td>
-                <td>
-                    <?php
-                    switch (true) {
-                    case ($daftar_item["umur"] >= 0 && $daftar_item["umur"] <= 13):
-                    echo "Anak-anak";
-                    break;
-                    case ($daftar_item["umur"] >= 14 && $daftar_item["umur"] <= 25):
-                    echo "Remaja";
-                    break;
-                    case ($daftar_item["umur"] > 25 && $daftar_item["umur"] <= 40):
-                    echo "Dewasa";
-                    break;
-                    case ($daftar_item["umur"] > 40 && $daftar_item["umur"] <= 60):
-                    echo "Tua";
-                    break;
-                    case ($daftar_item["umur"] > 60):
-                    echo "Lansia";
-                    break;
-                    }
-                    ?>
-                </td>
-                <td>
-                    <a href="hapus.php?kunci=<?php echo $index; ?>">hapus</a>
-                </td>
-            </tr>
+                <?php foreach($_SESSION["daftar"] as $index => $daftar): ?>
+                 <tr>
+                    <td><?php echo $daftar["nama"] ?></td>
+                    <td><?php echo $daftar["umur"] ?></td>
+                    <td><?php
+                            if($daftar["umur"] < 20){
+                                echo "Remaja";
+                            }elseif($daftar["umur"] >= 20 && $daftar["umur"] < 40){
+                                echo "Dewasa";
+                            }elseif($daftar["umur"] >= 40){
+                                echo "tua";
+                            }else{
+                                echo "Tidak Diketahui";
+                            }
+                        ?>
+                    </td>
+                    <td>
+                        <a href="hapus.php?index=<?php echo $index; ?>">delete</a> <a href="dashboard.php?index=<?php echo $index; ?>">update</a>
+                    </td>
+                 </tr>
                  <?php endforeach; ?>
         </table>
-        </form>    
-        <?php echo "Selamat datang " . $username . " ke-" . $count  ; ?>
-        </h1>`
+        </form>
     </body>
 </html>
