@@ -137,13 +137,16 @@ if(isset($_GET["index"])){
                     <td><?php echo $daftar["nama"] ?></td>
                     <td><?php echo $daftar["umur"] ?></td>
                     <td><?php
-                            if($daftar["umur"] < 20){
-                                echo "Remaja";
+                            if($daftar["umur"] < 10){
+                                echo "anak-anak";
+                            }elseif($daftar["umur"] >= 10 && $daftar["umur"] < 20){
+                                echo "remaja";
                             }elseif($daftar["umur"] >= 20 && $daftar["umur"] < 40){
-                                echo "Dewasa";
+                                echo "dewasa";
                             }elseif($daftar["umur"] >= 40){
                                 echo "tua";
-                            }else{
+                            }
+                            else{
                                 echo "Tidak Diketahui";
                             }
                         ?>
